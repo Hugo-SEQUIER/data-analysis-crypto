@@ -77,8 +77,6 @@ def somme_marketcap_par_timestamp(df):
     df = df.sort_values('timestamp')
     df_agg = df.groupby('timestamp')['market_cap'].sum().reset_index()
     df_agg['market_cap'] = df_agg['market_cap'].apply(convertir_en_format_numerique)
-    # Grouper par mois et calculer la moyenne de 'market_cap'
-    df_agg = df.groupby(pd.Grouper(key='timestamp', freq='D'))['market_cap'].max().reset_index()
 
     return df_agg
 
@@ -99,24 +97,24 @@ def plot_marketcap(df_marketcap, df_prices=None, btc=None, list_token=None):
     _, ax1 = plt.subplots(figsize=(20, 8))
 
     # Tracé de la capitalisation boursière
-    ax1.step(df_marketcap['timestamp'], df_marketcap['market_cap'], where='post', label='Market Cap (Step)', color='green')
+    ax1.step(df_marketcap['timestamp'], df_marketcap['market_cap'], where='post', label='Market Cap', color='green')
     ax1.set_xlabel('Date')
-    ax1.set_ylabel('Market Cap', color='green')
+    ax1.set_ylabel('Market Cap')
     ax1.tick_params(axis='y', labelcolor='green')
     ax1.xaxis.set_major_locator(mdates.AutoDateLocator(minticks=5, maxticks=15))
     ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
-    plt.xlim([df_marketcap['timestamp'].min(), pd.Timestamp('2024-05-22')])
+    plt.xlim([df_marketcap['timestamp'].min(), pd.Timestamp('2024-05-31')])
 
     # Si df_prices est fourni, tracer les prix sur un second axe y
     if df_prices is not None:
         ax2 = ax1.twinx()  # Créer un deuxième axe y qui partage le même axe x
         ax2.plot(pd.to_datetime(df_prices['Date']), df_prices['Close'], label='NVIDIA Price', color='red')
-        ax2.set_ylabel('Price', color='red')
+        #ax2.set_ylabel('Price', color='red')
         ax2.tick_params(axis='y', labelcolor='red')
 
     if btc is not None:
         ax3 = ax1.twinx()  # Créer un deuxième axe y qui partage le même axe x
-        ax3.plot(pd.to_datetime(btc['Date']), btc['Close'], label='BTC Price', color='orange')
+        ax3.plot(pd.to_datetime(btc['snapped_at']), btc['price'], label='BTC Price', color='orange')
         ax3.set_ylabel('Price')
         ax3.tick_params(axis='y', labelcolor='orange')
 
@@ -129,5 +127,5 @@ def plot_marketcap(df_marketcap, df_prices=None, btc=None, list_token=None):
     if list_token is not None :
         plt.annotate(list_token, xy=(0.5, 0), xycoords='axes fraction', ha='center', va='top', fontsize=10, xytext=(0, -50), textcoords='offset points')
 
-    plt.title('Market Cap and Close Price Over Time')
+    plt.title('Market Cap Over Time')
     plt.show()
